@@ -1,0 +1,178 @@
+{% extends "redissentry/base.html" %}
+{% load adminmedia admin_list i18n %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        #changelist .col {
+            width: 50%;
+            float:left;
+            min-width: 580px;
+        }
+        #changelist .col .results {
+            margin-right: 20px !important;
+            max-width: 658px;
+        }
+        #content #changelist {
+            background-position: 1474px 0px !important;
+        }
+        #changelist .results table {
+            width: 100% !important;
+        }
+        #changelist .results table tbody td:first-child {
+            text-align: left;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div id="changelist" class="filtered">
+    <div style="max-width: 1474px">
+        <div class="col">
+            <div class="results">
+                <h3>IP Counters</h3>
+                {% if countersA %}
+                    <div class="module" style="border-right:0">
+                        <table>
+                            <thead><tr><th>IP address</th><th>Failed attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {% for ip, n, ttl in countersA %}
+                                    <tr class="{% cycle 'row1' 'row2' %}">
+                                        <td>{{ ip }}</td>
+                                        <td>{{ n }}</td>
+                                        <td>{{ ttl }}</td>
+                                        <td><a href="remove/counter/a/?ip={{ ip }}">remove</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">&ndash; empty &ndash;</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col">
+            <div class="results">
+                <h3>IP Blacklist</h3>
+                {% if blacklistA %}
+                    <div class="module" style="border-right:0">
+                        <table>
+                            <thead><tr><th>IP address</th><th>Blocked attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {% for ip, n, ttl in blacklistA %}
+                                    <tr class="{% cycle 'row1' 'row2' %}">
+                                        <td>{{ ip }}</td><td>{{ n }}</td><td class="{{ explicit }}">{{ ttl }}</td>
+                                        <td><a href="remove/block/a/?ip={{ ip }}">remove</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">&ndash; empty &ndash;</p>
+                {% endif %}
+            </div>
+        </div>
+        <div style="clear:both"></div>
+        <div class="col" style="clear:both">
+            <div class="results">
+                <h3>Username Counters</h3>
+                {% if countersB %}
+                    <div class="module" style="border-right:0">
+                        <table>
+                            <thead><tr><th>Username</th><th>Failed attempts per IP</th><th>Time left</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {% for username, v, ttl in countersB %}
+                                    <tr class="{% cycle 'row1' 'row2' %}">
+                                        <td>{{ username }}</td>
+                                        <td>{% for ip, n in v %}{{ ip }}: {{ n }}<br/>{% endfor %}</td>
+                                        <td>{{ ttl }}</td>
+                                        <td><a href="remove/counter/b/?username={{ username|urlencode }}">remove</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">&ndash; empty &ndash;</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col">
+            <div class="results">
+                <h3>Username Blacklist</h3>
+                {% if blacklistB %}
+                    <div class="module" style="border-right:0">
+                        <table>
+                            <thead><tr><th>Username</th><th>Blocked attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {% for username, n, ttl in blacklistB %}
+                                    <tr class="{% cycle 'row1' 'row2' %}">
+                                        <td>{{ username }}</td><td>{{ n }}</td><td class="{{ explicit }}">{{ ttl }}</td>
+                                        <td><a href="remove/block/b/?username={{ username|urlencode }}">remove</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">&ndash; empty &ndash;</p>
+                {% endif %}
+            </div>
+        </div>
+        <div style="clear:both"></div>
+        <div class="col">
+            <div class="results">
+                <h3>Whitelist Counters</h3>
+                {% if countersW %}
+                    <div class="module" style="border-right:0">
+                        <table>
+                            <thead><tr><th>IP address</th><th>Username</th><th>Failed attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {% for ip, username, n, ttl in countersW %}
+                                    <tr class="{% cycle 'row1' 'row2' %}">
+                                        <td>{{ ip }}</td>
+                                        <td>{{ username }}</td>
+                                        <td>{{ n }}</td>
+                                        <td>{{ ttl }}</td>
+                                        <td><a href="remove/counter/w/?ip={{ ip }}&username={{ username|urlencode }}">remove</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">&ndash; empty &ndash;</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col">
+            <div class="results">
+                <h3>Whitelisted Users Blacklist</h3>
+                {% if blacklistW %}
+                    <div class="module" style="border-right:0">
+                        <table>
+                            <thead><tr><th>IP address</th><th>Username</th><th>Blocked attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                            {% for ip, username, n,  ttl in blacklistW %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ ip }}</td><td>{{ username }}</td><td>{{ n }}</td><td class="{{ explicit }}">{{ ttl }}</td>
+                                    <td><a href="remove/block/w/?ip={{ ip }}&username={{ username|urlencode }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">&ndash; empty &ndash;</p>
+                {% endif %}
+            </div>
+        </div>
+        <div id="logfile">
+            <h1>Log file</h1>
+            {% if log %}<pre>{{ log }}</pre>{% else %}<p class="empty" style="text-align:left">&ndash; empty &ndash;</p>{% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

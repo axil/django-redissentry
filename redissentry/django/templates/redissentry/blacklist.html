@@ -1,0 +1,70 @@
+{% extends "redissentry/base.html" %}
+{% load adminmedia admin_list i18n %}
+
+{% block breadcrumb %}Blacklist{% endblock %}
+
+{% block content %}
+    <div id="changelist" class="filtered">
+        <h1>RedisSentry Blacklist</h1>
+        <div class="results">
+            <div><h3>Blocks by IP</h3></div>
+            {% if blacklistA %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <thead><tr><th>IP address</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for ip, ttl in blacklistA %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ ip }}</td><td>{{ ttl }}</td>
+                                    <td><a href="a/remove/?ip={{ ip }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+            <div><h3>Blocks by Username</h3></div>
+            {% if blacklistB %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <thead><tr><th>Username</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for username, ttl in blacklistB %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ username }}</td><td>{{ ttl }}</td>
+                                    <td><a href="b/remove/?username={{ username|urlencode }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+            <div><h3>Blocks of Whitelisted Users</h3></div>
+            {% if blacklistW %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <tr><th>ip</th><th>username</th><th>ttl</th><th>&nbsp;</th></tr>
+                        {% for ip, username, ttl in blacklistW %}
+                            <tr class="{% cycle 'row1' 'row2' %}">
+                                <td>{{ ip }}</td><td>{{ username }}</td><td>{{ ttl }}</td>
+                                <td><a href="w/remove/?ip={{ ip }}&username={{ username|urlencode }}">remove</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "redissentry/base.html" %}
+{% load adminmedia admin_list i18n %}
+
+{% block breadcrumb %}Counters{% endblock %}
+
+{% block content %}
+    <div id="changelist" class="filtered">
+        <h1>RedisSentry Counters</h1>
+        <div class="results">
+            <div>
+                <h3>IP Counters</h3>
+            </div>
+            {% if countersA %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <thead><tr><th>IP address</th><th># failed attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for ip, n, ttl in countersA %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ ip }}</td>
+                                    <td>{{ n }}</td>
+                                    <td>{{ ttl }}</td>
+                                    <td><a href="a/remove/?ip={{ ip }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+
+            <div>
+                <h3>Username Counters</h3>
+            </div>
+            {% if countersB %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <thead><tr><th>Username</th><th># of failed attempts per IP</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for username, v, ttl in countersB %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ username }}</td>
+                                    <td>{% for ip, n in v %}{{ ip }}: {{ n }}<br/>{% endfor %}</td>
+                                    <td>{{ ttl }}</td>
+                                    <td><a href="b/remove/?username={{ username|urlencode }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+
+            <div>
+                <h3>IP Block Violation Counters</h3>
+            </div>
+            {% if countersAZ %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <thead><tr><th>IP address</th><th># of failed attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for ip, n, ttl in countersAZ %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ ip }}</td>
+                                    <td>{{ n }}</td>
+                                    <td>{{ ttl }}</td>
+                                    <td><a href="za/remove/?ip={{ ip }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+
+            <div>
+                <h3>Username Block Violation Counters</h3>
+            </div>
+            {% if countersBZ %}
+                <div class="module" style="border-right:0">
+                    <table>
+                        <thead><tr><th>Username</th><th># of failed attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for username, n, ttl in countersBZ %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ username }}</td>
+                                    <td>{{ n }}</td>
+                                    <td>{{ ttl }}</td>
+                                    <td><a href="zb/remove/?username={{ username|urlencode }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div>
+                    <p class="empty">&ndash; empty &ndash;</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

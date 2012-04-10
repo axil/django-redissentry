@@ -1,0 +1,57 @@
+{% extends "admin/base_site.html" %}
+{% load adminmedia admin_list i18n %}
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/changelists.css" />
+    <style>
+        #changelist h3 {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #changelist .hw {
+            width: 50%;
+        }
+        #changelist .empty{
+            font-size: 11px;
+            text-align: center;
+            padding-top: 3px;
+        }
+        #logfile {
+            clear: both;
+            padding-top: 20px;
+        }
+        #logfile pre{
+            height: 200px;
+            overflow: auto;
+        }
+        #changelist .expl {
+            color: green;
+        }
+        #changelist .impl {
+            color: red;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            var a = document.getElementById('logfile').children[1];
+            a.scrollTop = a.scrollHeight-200;
+        };
+    </script>
+{% endblock %}
+
+{% block bodyclass %}change-list{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="../../">
+    {% trans "Home" %}
+    </a>
+    &rsaquo;
+    <a href="../">
+        Redissentry
+    </a>
+    &rsaquo;
+    {% block breadcrumb %}{% endblock %}
+</div>
+{% endblock %}
+

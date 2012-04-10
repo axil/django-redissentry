@@ -1,0 +1,28 @@
+{% extends "redissentry/base.html" %}
+{% load adminmedia admin_list i18n %}
+
+{% block breadcrumb %}Whitelist{% endblock %}
+
+{% block content %}
+    <div id="changelist" class="filtered">
+        <div class="results">
+            {% if whitelist %}
+                <div class="module" style="border-right:0; max-width:850px">
+                    <table>
+                        <thead><tr><th>IP address</th><th>Username</th><th>Failed attempts</th><th>Time left</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for ip, username, n, ttl in whitelist %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    <td>{{ ip }}</td><td>{{ username }}</td><td>{{ n }}</td><td>{{ ttl }}</td>
+                                    <td><a href="remove/?ip={{ ip }}&username={{ username|urlencode }}">remove</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="font-size:11px">&ndash; empty &ndash;</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
