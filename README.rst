@@ -1,6 +1,6 @@
-===========
-RedisSentry
-===========
+==================
+RedisSentry-Django
+==================
 
 Installation
 ------------
@@ -8,11 +8,11 @@ Installation
 settings.py::
 
     MIDDLEWARE_CLASSES += (
-        'redissentry.middleware.RequestMiddleware',
+        'redissentry.django.middleware.RequestMiddleware',
     )
 
     INSTALLED_APPS += (
-        'redissentry',
+        'redissentry.django',
     )
 
 
@@ -20,4 +20,5 @@ Finetuning (Django)
 ------------------
 
 REDIS_SENTRY_DB = n if you want to use Redis db number n instead of the default 0
+
 
