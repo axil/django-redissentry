@@ -8,10 +8,11 @@ from django.utils.translation import string_concat
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
+from redissentry import RedisSentry
+# from redissentry import RedisSentryLite as RedisSentry      # uncomment to use the lite version
+
 from .middleware import get_request
 from .models import BlocksHistoryRecord, BLOCK_TYPES
-from .redissentry.core import RedisSentry
-# from .core import RedisSentryLite as RedisSentry      # uncomment to use the lite version
 
 RS_DB = getattr(settings, 'REDIS_SENTRY_DB', 0)                                                     # redis db #
 RS_ERROR_MSG = getattr(settings, 'REDIS_SENTRY_ERROR_MSG', _('Incorrect username or password.'))    # shown when the block has just been applied (every 5th failed attempt by default)
