@@ -1,3 +1,5 @@
 include LICENSE
 include README.rst
+include redissentry/templates/admin/redissentry/app_index.html 
+recursive-include redissentry/templates *.html
 
