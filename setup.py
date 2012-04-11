@@ -2,16 +2,16 @@
 
 from distutils.core import setup
 
-setup(name='redissentry.django',
+setup(name='redis-sentry-django',
       version='0.1.0',
       description='Django app based on RedisSentry protecting against password bruteforce attacks',
       long_description=open('README.rst').read(),
       author='Lev Maximov',
       author_email='lev.maximov@gmail.com',
-      url='http://github.com/axil/redissentry-django',
-      packages=['redissentry.django'],
-      install_requires=['redissentry>=0.1.0'],
-      dependency_links=['https://github.com/axil/redissentry/tarball/master#egg=redissentry-0.1.0'],
+      url='http://github.com/axil/redis-sentry-django',
+      packages=['redissentry'],
+      enstall_requires=['redis-sentry-core>=0.1.0'],
+      dependency_links=['https://github.com/axil/redis-sentry-core/tarball/master#egg=redis-sentry-core-0.1.0'],
       classifiers = [
           'Development Status :: 4 - Beta',
           'Environment :: Console',
