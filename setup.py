@@ -10,7 +10,7 @@ setup(name='redis-sentry-django',
       author_email='lev.maximov@gmail.com',
       url='http://github.com/axil/redis-sentry-django',
       packages=['redissentry'],
-      enstall_requires=['redis-sentry-core>=0.1.0'],
+      install_requires=['redis-sentry-core>=0.1.0'],
       dependency_links=['https://github.com/axil/redis-sentry-core/tarball/master#egg=redis-sentry-core-0.1.0'],
       classifiers = [
           'Development Status :: 4 - Beta',
