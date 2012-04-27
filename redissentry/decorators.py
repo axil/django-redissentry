@@ -14,9 +14,14 @@ from redissentrycore import RedisSentry
 from .middleware import get_request
 from .models import BlocksHistoryRecord, BLOCK_TYPES
 
-RS_DB = getattr(settings, 'REDIS_SENTRY_DB', 0)                                                     # redis db #
-RS_ERROR_MSG = getattr(settings, 'REDIS_SENTRY_ERROR_MSG', _('Incorrect username or password.'))    # shown when the block has just been applied (every 5th failed attempt by default)
-RS_ERROR_SEP = getattr(settings, 'REDIS_SENTRY_ERROR_SEP', ' ')                                     # eg '<br/>'
+FA_PER_IP       = getattr(settings, 'RS_FA_PER_IP', 5)                                    # block ip after every N failed attempts
+FA_PER_USERNAME = getattr(settings, 'RS_FA_PER_USERNAME', 5)                              # block username after every N failed attempts
+REDIS_DB        = lambda:getattr(settings, 'RS_REDIS_DB', 0)                              # redis db number; lambda is necessary for the tests
+
+ERROR_MSG       = getattr(settings, 'RS_ERROR_MSG', _('Incorrect username or password.')) # shown when the block has just been applied (every 5th failed attempt by default)
+ERROR_SEP       = getattr(settings, 'RS_ERROR_SEP', ' ')                                  # eg '<br/>'
+TEST_MODE       = lambda:getattr(settings, 'RS_TEST_MODE', False)                         # used in testing suite
+SAVE_HISTORY    = getattr(settings, 'RS_SAVE_HISTORY', True)                              # store events in a table from the main db
 
 def user_exists_callback(username):
     return User.objects.filter(username=username).exists()
@@ -65,7 +70,7 @@ def protect(auth):
     if hasattr(auth, '__protected__'):
         return auth
     
-    def wrapper(username=None, password=None, error_msg=RS_ERROR_MSG, error_sep=RS_ERROR_SEP):
+    def wrapper(username=None, password=None, error_msg=ERROR_MSG, error_sep=ERROR_SEP):
         try:
             request = get_request()
             if request:
@@ -75,9 +80,11 @@ def protect(auth):
                 ip = ''
 
             rs = RedisSentry(ip, username, 
-                    user_exists_callback_test if getattr(settings, 'REDIS_SENTRY_TEST', False) else user_exists_callback,
-                    store_history_record if getattr(settings, 'REDIS_SENTRY_SAVE_HISTORY', True) else None,
-                    RS_DB)
+                    user_exists_callback_test if TEST_MODE else user_exists_callback,
+                    store_history_record if SAVE_HISTORY else None,
+                    REDIS_DB())
+            rs.fa.period = FA_PER_IP
+            rs.fb.period = FA_PER_USERNAME
         except: # fallback for redis initialization error
             getLogger('redissentry').error(format_exc())
             return auth(username=username, password=password)
