@@ -8,8 +8,8 @@ from django.utils.translation import string_concat
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from redissentry import RedisSentry
-# from redissentry import RedisSentryLite as RedisSentry      # uncomment to use the lite version
+from redissentrycore import RedisSentry
+# from redissentrycore import RedisSentryLite as RedisSentry      # uncomment to use the lite version
 
 from .middleware import get_request
 from .models import BlocksHistoryRecord, BLOCK_TYPES
