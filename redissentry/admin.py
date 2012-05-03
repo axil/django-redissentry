@@ -42,7 +42,7 @@ Whitelist._meta.abstract = False
 admin.site.register(Whitelist, WhitelistAdmin)
 Whitelist._meta.abstract = True
 
-if getattr(settings, 'REDIS_SENTRY_SAVE_HISTORY', True):
+if getattr(settings, 'RS_SAVE_HISTORY', True):
     class BlocksHistoryRecordAdmin(admin.ModelAdmin):
         list_display = 'block_type', 'ip', 'get_username', 'failed_attempts', 'blocked_attempts', 'created'
         list_filter = 'block_type',

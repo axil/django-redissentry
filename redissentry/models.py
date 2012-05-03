@@ -4,7 +4,7 @@ from django.conf import settings
 
 if getattr(settings, 'RS_PRETTY_ADMIN_LABEL', False):
     class RedisSentryLabel(str):
-        def __new__(cls):
+        def __new__(cls, *args, **kwargs):
             return str.__new__(cls, 'redissentry')
         def title(self):
             return 'Redis Sentry'

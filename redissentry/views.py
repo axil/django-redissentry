@@ -10,14 +10,17 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-REDIS_SENTRY_DB = getattr(settings,'REDIS_SENTRY_DB', 0)
-LAST_LOG_LINES = getattr(settings, 'LAST_LOG_LINES', 100)
+REDIS_HOST = getattr(settings,'RS_REDIS_HOST', 'localhost')
+REDIS_PORT = getattr(settings,'RS_REDIS_PORT', 6379)
+REDIS_PASSWORD = getattr(settings,'RS_REDIS_PASSWORD', '')
+REDIS_DB = getattr(settings,'RS_REDIS_DB', 0)
+LAST_LOG_LINES = getattr(settings, 'RS_LAST_LOG_LINES', 100)
 
 def get_ttl(r, k):
     return str(td(seconds=r.ttl(k)))
     
 def get_redis():
-    return Redis(db = REDIS_SENTRY_DB)
+    return Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, db=REDIS_DB)
 
 def show_whitelist(request):
     r = get_redis()

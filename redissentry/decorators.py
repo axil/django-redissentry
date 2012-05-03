@@ -16,6 +16,9 @@ from .models import BlocksHistoryRecord, BLOCK_TYPES
 
 FA_PER_IP       = getattr(settings, 'RS_FA_PER_IP', 5)                                    # block ip after every N failed attempts
 FA_PER_USERNAME = getattr(settings, 'RS_FA_PER_USERNAME', 5)                              # block username after every N failed attempts
+REDIS_HOST      = getattr(settings,'RS_REDIS_HOST', 'localhost')
+REDIS_PORT      = getattr(settings,'RS_REDIS_PORT', 6379)
+REDIS_PASSWORD  = getattr(settings,'RS_REDIS_PASSWORD', '')
 REDIS_DB        = lambda:getattr(settings, 'RS_REDIS_DB', 0)                              # redis db number; lambda is necessary for the tests
 
 ERROR_MSG       = getattr(settings, 'RS_ERROR_MSG', _('Incorrect username or password.')) # shown when the block has just been applied (every 5th failed attempt by default)
@@ -80,9 +83,9 @@ def protect(auth):
                 ip = ''
 
             rs = RedisSentry(ip, username, 
-                    user_exists_callback_test if TEST_MODE else user_exists_callback,
+                    REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB(),
                     store_history_record if SAVE_HISTORY else None,
-                    REDIS_DB())
+                    user_exists_callback_test if TEST_MODE else user_exists_callback)
             rs.fa.period = FA_PER_IP
             rs.fb.period = FA_PER_USERNAME
         except: # fallback for redis initialization error
