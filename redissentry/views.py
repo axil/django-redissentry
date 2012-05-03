@@ -3,10 +3,10 @@ from datetime import timedelta as td
 from urllib import unquote
 from struct import unpack
 
-from redis import Redis
+from redis import Redis, RedisError
 
 from django.views.generic.simple import direct_to_template
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -22,6 +22,15 @@ def get_ttl(r, k):
 def get_redis():
     return Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, db=REDIS_DB)
 
+def catch_redis_exceptions(foo):
+    def wrapper(request):
+        try:
+            return foo(request)
+        except RedisError, e:
+            return HttpResponse(str(e))
+    return wrapper
+
+@catch_redis_exceptions
 def show_whitelist(request):
     r = get_redis()
     whitelist = [k.split(':')[1:] + [r.get(k)] + [get_ttl(r, k)] for k in r.keys('Wc:*')]
@@ -30,6 +39,7 @@ def show_whitelist(request):
         'whitelist': whitelist,
     })
 
+@catch_redis_exceptions
 def show_blacklist(request):
     r = get_redis()
     blacklistA = [(k.split(':')[1], get_ttl(r, k)) for k in r.keys('Ab:*')]
@@ -42,6 +52,7 @@ def show_blacklist(request):
         'blacklistW': blacklistW,
     })
 
+@catch_redis_exceptions
 def show_dashboard(request):
     r = get_redis()
     countersA  = [(k.split(':')[1], r.get(k), get_ttl(r, k)) for k in r.keys('Ac:*')]
@@ -78,10 +89,12 @@ def show_dashboard(request):
         'log': ''.join(log),
     })
 
+@catch_redis_exceptions
 def remove_from_whitelist(request):
     get_redis().delete(':'.join(('Wc', request.GET.get('ip', ''), request.GET.get('username'))))
     return HttpResponseRedirect(reverse('admin:redissentry_whitelist_changelist'))
 
+@catch_redis_exceptions
 def remove_from_blacklist(request, filter_name):
     k = ''
     ip = request.GET.get('ip', '')
@@ -94,6 +107,7 @@ def remove_from_blacklist(request, filter_name):
         get_redis().delete((filter_name.upper() + 'b' + k))
     return HttpResponseRedirect(reverse('admin:redissentry_dashboard_changelist'))
 
+@catch_redis_exceptions
 def remove_from_counters(request, filter_name):
     k = ''
     ip = request.GET.get('ip', '')

@@ -14,19 +14,17 @@ else:
 
 class Whitelist(models.Model):
     class Meta:
-        abstract = True
         app_label = app_label
         verbose_name_plural = 'Whitelist'
 
-class Blacklist(models.Model):
-    class Meta:
-        abstract = True
-        app_label = app_label
-        verbose_name_plural = 'Blacklist'
+#class Blacklist(models.Model):
+#    class Meta:
+#        abstract = True
+#        app_label = app_label
+#        verbose_name_plural = 'Blacklist'
 
 class Dashboard(models.Model):
     class Meta:
-        abstract = True
         app_label = app_label
         verbose_name_plural = 'Dashboard'
 
@@ -68,3 +66,4 @@ if getattr(settings, 'RS_SAVE_HISTORY', True):
             else:
                 return '..., ' + self.username if self.username else '(None)'
         get_username.short_description = _('Username')
+
