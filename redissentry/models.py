@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.contrib.auth.models import User
 
 if getattr(settings, 'RS_PRETTY_ADMIN_LABEL', False):
     class RedisSentryLabel(str):
@@ -67,3 +68,12 @@ if getattr(settings, 'RS_SAVE_HISTORY', True):
                 return '..., ' + self.username if self.username else '(None)'
         get_username.short_description = _('Username')
 
+class WhitelistRecord(models.Model):
+    user = models.ForeignKey(User)
+    ip = models.IPAddressField()
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    expire_date = models.DateTimeField(db_index=True)
+
+    class Meta:
+        app_label = app_label
+        ordering = '-created',
