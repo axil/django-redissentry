@@ -9,6 +9,10 @@ if getattr(settings, 'RS_PRETTY_ADMIN_LABEL', False):
             return str.__new__(cls, 'redissentry')
         def title(self):
             return 'Redis Sentry'
+        def __conform__(self, *args, **kwargs):
+            return self
+        def getquoted(self):
+            return "'redissentry'"
     app_label = RedisSentryLabel()
 else:
     app_label = 'redissentry'
