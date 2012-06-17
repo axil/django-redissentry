@@ -35,6 +35,7 @@ class DashboardAdmin(admin.ModelAdmin):
 #
 class WhitelistRecordAdmin(admin.ModelAdmin):
     list_display = 'ip', 'user', 'expire_date'
+    raw_id_fields = 'user',
 admin.site.register(WhitelistRecord, WhitelistRecordAdmin)
 
 Dashboard._meta.abstract = False
