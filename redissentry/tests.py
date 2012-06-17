@@ -4,14 +4,19 @@ warnings.filterwarnings('ignore')
 from django.utils import unittest
 #import os
 
-from bs4 import BeautifulSoup as BS
+try:
+    from bs4 import BeautifulSoup as BS             # BeautifulSoup 4
+except:
+    from BeautifulSoup import BeautifulSoup as BS   # BeautifulSoup 3
 from redis import Redis
 
 from django.test.client import Client
 from django.conf import settings
 
 
-LOGIN_URL = '/accounts/login/'
+#LOGIN_URL = '/accounts/login/'
+LOGIN_URL = '/'
+LOGOUT_URL = '/logout/'
 
 settings.RS_TEST_MODE = True         # <anybody>@example.com is registered
 settings.RS_REDIS_DB = 1             # redis db #1 is used for testing to keep the default db #0 intact
@@ -28,8 +33,6 @@ class LoggedInException(Exception):
 def login(username, password='ddd', ip='127.0.0.1'):
     response = c.post(LOGIN_URL, {'username': username, 'password': password}, REMOTE_ADDR=ip)
     res = None
-    from django.contrib.auth.models import User
-    z = User.objects.filter(username='existing@example.com')
     if response.status_code in (301, 302):
         print '(redirected)'
         raise LoggedInException()
@@ -38,12 +41,17 @@ def login(username, password='ddd', ip='127.0.0.1'):
     else:
         try:
             soup = BS(response.content)
-            z = soup.find('table', 'error').find('td')
-            res = ' '.join(z.strings)
+            #z = soup.find('table', 'error').find('td')
+            items = soup.find(attrs='errorlist').find('li')
+            res = ' '.join(item.string for item in items)
             print res
         except:
             print '(no errors)'
     return res
+
+def clean_whitelist():
+    from redissentry.models import WhitelistRecord
+    WhitelistRecord.objects.all().delete()
 
 class TestBase(object):
     def setUp(self):
@@ -61,6 +69,7 @@ class TestBase(object):
     
     def assertAuthenticated(self, *args, **kwargs):
         self.assertRaises(LoggedInException, login, *args, **kwargs)
+        c.get(LOGOUT_URL)
 
 class Test(TestBase, unittest.TestCase):
     def testA(self):
@@ -111,13 +120,14 @@ class Test(TestBase, unittest.TestCase):
             print '(time passes...)'
             r.delete('Bb:aaa@example.com')
 
-class TestWhitelists(TestBase, unittest.TestCase):
+class WhitelistTest(TestBase, unittest.TestCase):
 
     def setUp(self):
         global userCreated
-        super(TestWhitelists, self).setUp()
-        from django.contrib.auth.models import User
+        super(WhitelistTest, self).setUp()
         if not userCreated:
+            from django.contrib.auth.models import User
+            self.assertEqual(User.objects.count(), 0)   # this code should be run against a blank test database!
             user = User(username='existing@example.com', is_active=True)
             user.set_password('qwerty')
             user.save()
@@ -129,6 +139,7 @@ class TestWhitelists(TestBase, unittest.TestCase):
             self.assertAllowed('aaa@bbb.cc')
         self.assertRejected('aaa@bbb.cc')
         self.assertAllowed('existing@example.com')
+        clean_whitelist()
     
     def testW1(self):
         for i in xrange(4):
@@ -136,12 +147,14 @@ class TestWhitelists(TestBase, unittest.TestCase):
         self.assertAuthenticated('existing@example.com', 'qwerty')
         self.assertAllowed('aaa@bbb.cc')
         self.assertRejected('aaa@bbb.cc')
+        clean_whitelist()
     
     def testW2(self):
         self.assertAuthenticated('existing@example.com', 'qwerty')
         for i in xrange(5):
             self.assertAllowed('existing@example.com')
         self.assertRejected('existing@example.com')
+        clean_whitelist()
 
 if __name__ == '__main__':
     if getattr(settings, 'RS_TEST_WHITELIST_AS_WELL', False):
@@ -149,11 +162,5 @@ if __name__ == '__main__':
     else:
         suite = unittest.TestLoader().loadTestsFromTestCase(Test)
         unittest.TextTestRunner(verbosity=2).run(suite)
-        print '\nWarning: whitelist testing was skipped. Use \'./manage.py test redissentry\' to go through all tests (slower)'
-#    import timeit
-#    print timeit.Timer('testAZ()', 'from __main__ import *').timeit(number=1)
-#    print timeit.Timer('testB()', 'from __main__ import *').timeit(number=1)
-#    print timeit.Timer('testB1()', 'from __main__ import *').timeit(number=1)
-#    print timeit.Timer('testBZ()', 'from __main__ import *').timeit(number=1)
-#    print timeit.Timer('testW()', 'from __main__ import *').timeit(number=1)
-#    print timeit.Timer('testWZ()', 'from __main__ import *').timeit(number=1)
+        print '\nWarning: to speed things up whitelist testing was skipped (so that only test redis db is used). '\
+              'Run \'./manage.py test redissentry\' to go through all tests (test main database will be used as well).'

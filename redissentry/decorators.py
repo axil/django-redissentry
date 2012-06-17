@@ -9,10 +9,12 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from redissentrycore import RedisSentry
+from redissentrycore.utils import fallback
 # from redissentrycore import RedisSentryLite as RedisSentry      # uncomment to use the lite version
 
 from .middleware import get_request
 from .models import BlocksHistoryRecord, BLOCK_TYPES
+from .filters import FilterWMainDb
 
 FA_PER_IP       = getattr(settings, 'RS_FA_PER_IP', 5)                                    # block ip after every N failed attempts
 FA_PER_USERNAME = getattr(settings, 'RS_FA_PER_USERNAME', 5)                              # block username after every N failed attempts
@@ -69,6 +71,26 @@ def store_history_record(block_type, ip, username, failed_attempts=None, blocked
     except:
         pass
 
+class RedisSentryWMD(RedisSentry):
+    # uses main db for storing the whitelist
+    FW = FilterWMainDb
+
+    def whitelist(self, user):
+        self.fw.whitelist(user)
+
+    @fallback('')
+    def inform(self, user):
+        if user is not None:
+            self.whitelist(user)
+            res = 0, ''
+        else:
+            if self.whitelisted:
+                res = self.fw.update()
+            else:
+                res = max(self.fa.update(), self.fb.update())
+        return res[1]
+            
+
 def protect(auth):
     if hasattr(auth, '__protected__'):
         return auth
@@ -82,7 +104,7 @@ def protect(auth):
             else:
                 ip = ''
 
-            rs = RedisSentry(ip, username, 
+            rs = RedisSentryWMD(ip, username, 
                     REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB(),
                     store_history_record if SAVE_HISTORY else None,
                     user_exists_callback_test if TEST_MODE else user_exists_callback)
@@ -98,7 +120,7 @@ def protect(auth):
         
         user = auth(username=username, password=password)
         
-        msg = rs.inform(bool(user))
+        msg = rs.inform(user)
 
         if user is None and error_msg is not None and msg:
             raise forms.ValidationError(mark_safe(string_concat(error_msg, error_sep, msg)))
