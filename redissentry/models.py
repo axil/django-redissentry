@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 if getattr(settings, 'RS_PRETTY_ADMIN_LABEL', False):
     class RedisSentryLabel(str):
+        # dirty hack, use at your own risk
         def __new__(cls, *args, **kwargs):
             return str.__new__(cls, 'redissentry')
         def title(self):
@@ -17,10 +18,10 @@ if getattr(settings, 'RS_PRETTY_ADMIN_LABEL', False):
 else:
     app_label = 'redissentry'
 
-class Whitelist(models.Model):
-    class Meta:
-        app_label = app_label
-        verbose_name_plural = 'Whitelist'
+#class Whitelist(models.Model):
+#    class Meta:
+#        app_label = app_label
+#        verbose_name_plural = 'Whitelist'
 
 #class Blacklist(models.Model):
 #    class Meta:
@@ -44,7 +45,7 @@ if getattr(settings, 'RS_SAVE_HISTORY', True):
     class BlocksHistoryRecord(models.Model):
         # Note that failed_attempts and blocked_attempts are not total numbers 
         # of the corresponding attempts encountered, but numbers that triggered 
-        # the last block in the series
+        # the most recent block in the series
         block_type = models.CharField(choices = BLOCK_TYPES, max_length=1, null=True)
         ip = models.CharField(_('IP address'), max_length=2048, null=True, blank=True)
         username = models.CharField(max_length=255, null=True, blank=True)
@@ -73,10 +74,12 @@ if getattr(settings, 'RS_SAVE_HISTORY', True):
         get_username.short_description = _('Username')
 
 class WhitelistRecord(models.Model):
+    # stores successful login attempts
+    # expired items need to be flushed via cron-job
     user = models.ForeignKey(User)
     ip = models.IPAddressField()
     created = models.DateTimeField(auto_now_add=True, db_index=True)
-    expire_date = models.DateTimeField(db_index=True)
+    expire_date = models.DateTimeField(_('Expire date (UTC)'), db_index=True)
 
     class Meta:
         app_label = app_label
