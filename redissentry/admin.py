@@ -2,10 +2,10 @@ from django.contrib import admin
 from django.conf.urls.defaults import patterns
 from django.conf import settings
 
-from .models import Dashboard, Whitelist, BlocksHistoryRecord, WhitelistRecord
+from .models import Dashboard, BlocksHistoryRecord, WhitelistRecord#, Whitelist
 from .views import (
-    show_dashboard, show_whitelist, 
-    remove_from_whitelist, remove_from_blacklist, remove_from_counters,
+    show_dashboard, # show_whitelist, 
+    remove_from_blacklist, remove_from_counters, #remove_from_whitelist,
 )
 
 class DashboardAdmin(admin.ModelAdmin):
