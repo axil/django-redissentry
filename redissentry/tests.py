@@ -156,6 +156,16 @@ class WhitelistTest(TestBase, unittest.TestCase):
         self.assertRejected('existing@example.com')
         clean_whitelist()
 
+    def testW3(self):
+        self.assertAuthenticated('existing@example.com', 'qwerty')
+        for i in xrange(4):
+            self.assertAllowed('aaa@bbb.com')
+        for i in xrange(7):
+            self.assertAuthenticated('existing@example.com', 'qwerty', ip='127.0.0.%d' % (2+i))
+        self.assertAllowed('existing@example.com')
+        self.assertRejected('existing@example.com')
+        clean_whitelist()
+
 if __name__ == '__main__':
     if getattr(settings, 'RS_TEST_WHITELIST_AS_WELL', False):
         unittest.main(verbosity=2)
