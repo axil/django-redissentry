@@ -1,11 +1,14 @@
 from traceback import format_exc
 from datetime import datetime as dt, timedelta as td
 
+from django.conf import settings
+
 from redissentrycore.filters  import Filter
 from redissentrycore.utils import humanize, fallback
 
 from .models import WhitelistRecord
 
+WL_SIZE_PER_USER = getattr(settings, 'RS_WL_SIZE_PER_USER', 7)                            # forget all but last N whitelisted ip addresses per user
 
 class FilterWMainDb(Filter):
     db_record_ttl = 30*24*60      # a month
@@ -27,6 +30,9 @@ class FilterWMainDb(Filter):
             if n == 0:
                 WhitelistRecord.objects.create(ip=self.ip, user=user, 
                     expire_date=dt.utcnow() + td(minutes=self.db_record_ttl))
+                for r in WhitelistRecord.objects.filter(user=user).order_by('-expire_date')[WL_SIZE_PER_USER:]:
+                    r.delete()      # ugly, but django doesn't support deleting a slice directly;
+                                    # should not impose an overhead, since at most one item is deleted
             self.log('user whitelisted')
         except:
             self.logger.error(format_exc())
