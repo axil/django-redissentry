@@ -22,7 +22,7 @@ settings.RS_TEST_MODE = True         # <anybody>@example.com is registered
 settings.RS_REDIS_DB = 1             # redis db #1 is used for testing to keep the default db #0 intact
 settings.SAVE_HISTORY = False
 
-r = Redis(db = settings.RS_REDIS_DB)
+r = Redis(host=settings.RS_REDIS_HOST, port=settings.RS_REDIS_PORT, password=settings.RS_REDIS_PASSWORD, db = settings.RS_REDIS_DB)
 c = Client()
 
 userCreated = False
